@@ -14,19 +14,24 @@ def get_songs(station_id, max_songs=50):
     page = get_page(station_id)
     while True:
         for item in page:
+            total+=1
             track = item['track']
+            if track['id'] in SONG_CACHE:
+                continue
+            SONG_CACHE[track['id']] = True
+
             song = {'title': track['name'], 'artist': track['artists'][0]}
             for link in item['links']:
                 if link['site'] == 'itunes':
                     song['url'] = link['url']
                     break
             songs.append(song)
-            total+=1
+
+        if total >= max_songs:
+            break
     
         last = rfc3339_to_timestamp_ms(page[-1]['start_time'])
         page = get_page(station_id, last)
-        if total >= max_songs:
-            break
 
     return songs
 
