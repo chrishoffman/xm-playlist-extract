@@ -1,6 +1,6 @@
 import argparse
 import requests
-import json
+import csv
 from datetime import datetime
 
 
@@ -40,6 +40,13 @@ def get_page(station_id, last=None):
 def rfc3339_to_timestamp_ms(rfc3339):
     return int(datetime.fromisoformat(rfc3339).timestamp() * 1000)
 
+def write_csv(songs, filename):
+    with open(filename, 'w') as f:
+        fieldnames = ['title', 'artist', 'url']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for song in songs:
+            writer.writerow(song)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--station_id', dest='station_id', type=str, help='The station to get songs from')
@@ -47,4 +54,5 @@ parser.add_argument('--count', dest='count', type=int, help='The number of songs
 args = parser.parse_args()
 
 res = get_songs(args.station_id, args.count)
-print(json.dumps(res, indent=2))
+write_csv(res, 'songs.csv')
+
